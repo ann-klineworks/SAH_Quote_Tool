@@ -1,1 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAH Partner Planner</title>
+  <style>
+    :root {
+      --bg: #eef1f4;
+      --sheet: #ffffff;
+      --line: #d8dde3;
+      --line-dark: #bcc4cc;
+      --text: #1f2a37;
+      --muted: #5b6775;
+      --warn: #9a6700;
+      --warn-bg: #fff7e6;
+      --bad: #b42318;
+      --bad-bg: #fef3f2;
+      --ok: #027a48;
+      --ok-bg: #ecfdf3;
+      --accent: #1d4ed8;
+    }
 
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.35;
+    }
+
+    .page {
+      max-width: 1700px;
+      margin: 18px auto 28px;
+      padding: 0 16px;
+    }
+
+    .sheet {
+      background: var(--sheet);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: 0 1px 2px rgba(16,24,40,.04);
+      padding: 16px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+
+    .top-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+      min-width: 0;
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 6px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      gap: 8px 10px;
+      align-items: center;
+    }
+
+    label {
+      font-size: 13px;
+      color: #334155;
+    }
+
+    input[type="text"], input[type="number"], select, textarea {
+      width: 100%;
+      border: 1px solid var(--line-dark);
+      border-radius: 6px;
+      padding: 7px 8px;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    input[type="number"] { min-width: 90px; }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .helper-note {
+      margin-top: 8px;
+      font-size: 12px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--accent);
+      background: #f8fbff;
+    }
+
+    .inline-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(90px, 1fr));
+      gap: 8px;
+    }
+
+    .section {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fafc;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr auto auto;
+      gap: 8px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    button {
+      border: 1px solid #9fb4d4;
+      background: #eef4ff;
+      color: #173b78;
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #e1ecff; }
+
+    .btn-neutral {
+      border-color: var(--line-dark);
+      background: #f8fafc;
+      color: #334155;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 1280px;
+      font-size: 12px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 6px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    td input, td select {
+      font-size: 12px;
+      padding: 5px 6px;
+      min-width: 72px;
+    }
+
+    .w-service { min-width: 250px; }
+    .w-small { min-width: 68px; }
+    .w-med { min-width: 110px; }
+    .num { text-align: right; }
+    .danger { color: var(--bad); font-weight: 700; }
+    .ok { color: var(--ok); }
+
+    .flag-cell {
+      max-width: 220px;
+      white-space: normal;
+      line-height: 1.2;
+      font-size: 11px;
+    }
+
+    .warning-box {
+      margin-top: 12px;
+      border: 1px solid #f7d8a8;
+      background: var(--warn-bg);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .warning-item { margin: 3px 0; color: #7a4b00; }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(260px, 1fr));
+      gap: 8px;
+      padding: 12px;
+    }
+
+    .summary-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 10px;
+    }
+
+    .summary-card h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 5px;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 5px 8px;
+      font-size: 12px;
+    }
+
+    .kv div:nth-child(odd) { color: #475467; }
+
+    details {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    summary {
+      padding: 10px 12px;
+      cursor: pointer;
+      font-weight: 700;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .admin-body {
+      padding: 12px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .admin-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+    }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .pill {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid var(--line-dark);
+      background: #f8fafc;
+      margin-left: 5px;
+    }
+
+    .info-tip {
+      display: inline-block;
+      margin-left: 6px;
+      width: 16px;
+      height: 16px;
+      line-height: 16px;
+      text-align: center;
+      border: 1px solid #999;
+      border-radius: 50%;
+      font-size: 11px;
+      color: #555;
+      cursor: help;
+      background: #fafafa;
+      vertical-align: middle;
+    }
+
+    @media (max-width: 1200px) {
+      .top-grid { grid-template-columns: 1fr; }
+      .toolbar { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="sheet">
+      <h1>SAH Partner Planner</h1>
+      <div class="sub">
+        Practical quoting and planning tool. Contribution rates and pricing are estimates unless confirmed by Services Australia or provider records.
+      </div>
+
+      <!-- TOP SECTION -->
+      <div class="top-grid">
+        <div class="card">
+          <h2>Setup and Contribution Helper</h2>
+          <div class="field-grid">
+            <label>Partner</label><input id="partner" type="text" />
+            <label>Provider</label><input id="provider" type="text" />
+            <label>Customer</label><input id="customer" type="text" />
+            <label>URN</label><input id="urn" type="text" />
+            <label>Classification
+              <span class="info-tip" title="Required. Must be manually selected.">i</span>
+            </label>
+            <select id="classification">
+              <option value="">Select classification</option>
+              <option>Classification 1</option><option>Classification 2</option><option>Classification 3</option><option>Classification 4</option>
+              <option>Classification 5</option><option>Classification 6</option><option>Classification 7</option><option>Classification 8</option>
+              <option>HCP Level 1 (grandfathered)</option><option>HCP Level 2 (grandfathered)</option>
+              <option>HCP Level 3 (grandfathered)</option><option>HCP Level 4 (grandfathered)</option>
+            </select>
+
+            <label>Contribution status
+              <span class="info-tip" title="Sets default contribution percentages by category.">i</span>
+            </label>
+            <select id="contribStatus"></select>
+
+            <label>Clinical %</label><input id="clinicalPct" type="number" step="0.1" min="0" max="100" />
+            <label>Independence %</label><input id="independencePct" type="number" step="0.1" min="0" max="100" />
+            <label>Everyday Living %</label><input id="everydayPct" type="number" step="0.1" min="0" max="100" />
+          </div>
+          <div class="helper-note" id="contribBanner"></div>
+        </div>
+
+        <div class="card">
+          <h2>Ongoing Budget</h2>
+          <div class="field-grid">
+            <label>SAH Budget
+              <span class="info-tip" title="Primary ongoing SAH funding pool.">i</span>
+            </label><input id="budgetSah" type="number" step="0.01" min="0" />
+            <label>Carry Over
+              <span class="info-tip" title="Added to SAH ongoing available funds.">i</span>
+            </label><input id="budgetCarry" type="number" step="0.01" min="0" />
+            <label>Legacy HCP
+              <span class="info-tip" title="Legacy drawdown source used based on section rules.">i</span>
+            </label><input id="budgetLegacy" type="number" step="0.01" min="0" />
+            <label>Care Mgmt %
+              <span class="info-tip" title="Captured for planning only unless specific policy rule is added.">i</span>
+            </label><input id="careMgmtPct" type="number" step="0.1" min="0" max="100" />
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Short Term Budget</h2>
+          <div class="field-grid">
+            <label>Assistive Tech
+              <span class="info-tip" title="AT budget for eligible AT claims.">i</span>
+            </label><input id="budgetAT" type="number" step="0.01" min="0" />
+            <label>Home Mods
+              <span class="info-tip" title="HM budget for eligible HM claims.">i</span>
+            </label><input id="budgetHM" type="number" step="0.01" min="0" />
+            <label>EOL
+              <span class="info-tip" title="End of Life short term budget.">i</span>
+            </label><input id="budgetEOL" type="number" step="0.01" min="0" />
+            <label>RCP
+              <span class="info-tip" title="Restorative Care Pathway short term budget.">i</span>
+            </label><input id="budgetRCP" type="number" step="0.01" min="0" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ONGOING SECTION -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">SAH Ongoing Funding <span class="info-tip" title="Standard SAH catalogue services only. AT/HM excluded.">i</span></div>
+          <button id="addOngoing">Add Service</button>
+        </div>
+        <div class="toolbar">
+          <input id="ongoingSearch" type="text" placeholder="Search service..." />
+          <select id="ongoingGroup"></select>
+          <select id="ongoingCategory"></select>
+          <button class="btn-neutral" id="clearOngoingFilters">Clear Filters</button>
+          <div class="small">Filtered list affects Service dropdown options.</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Remove</th><th>Group</th><th>Category</th><th class="w-service">Service</th><th>Rate</th><th>Units</th><th>Freq</th>
+                <th>Contribution %</th><th>Govt <span class="info-tip" title="Government-funded amount after client contribution.">i</span></th>
+                <th>Client <span class="info-tip" title="Client contribution on base service cost only.">i</span></th>
+                <th>Flag <span class="info-tip" title="Rule warnings, caps, or checks.">i</span></th><th>Source</th><th>Code</th>
+              </tr>
+            </thead>
+            <tbody id="ongoingBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SHORT TERM SECTION -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Short Term Funding <span class="info-tip" title="AT/HM/EOL/RCP bucket rules apply.">i</span></div>
+          <button id="addShort">Add Service</button>
+        </div>
+        <div class="toolbar">
+          <input id="shortSearch" type="text" placeholder="Search service..." />
+          <select id="shortGroup"></select>
+          <select id="shortCategory"></select>
+          <button class="btn-neutral" id="clearShortFilters">Clear Filters</button>
+          <div class="small">Filtered list affects Service dropdown options.</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Remove</th><th>Bucket</th><th>Category</th><th class="w-service">Service</th><th>Rate</th><th>Units</th><th>Freq</th>
+                <th>Contribution %</th><th>Admin / Coord Fee <span class="info-tip" title="AT fee cap: min(10%, $500). HM cap: min(15%, $1,500).">i</span></th>
+                <th>Total Claim</th><th>Govt <span class="info-tip" title="Government-funded amount after client contribution.">i</span></th>
+                <th>Client <span class="info-tip" title="Client contribution on base service cost only.">i</span></th>
+                <th>Flag <span class="info-tip" title="Rule warnings, caps, or checks.">i</span></th><th>Source</th><th>Code</th>
+              </tr>
+            </thead>
+            <tbody id="shortBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SUMMARY -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Summary <span class="info-tip" title="Totals, drawdown results, and remaining balances.">i</span></div>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-card">
+            <h3>Totals</h3>
+            <div class="kv" id="summaryTotals"></div>
+          </div>
+          <div class="summary-card">
+            <h3>Remaining Budgets</h3>
+            <div class="kv" id="summaryRemaining"></div>
+          </div>
+          <div class="summary-card">
+            <h3>Warnings</h3>
+            <div id="warningsPanel" class="warning-box"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN -->
+      <details>
+        <summary>Admin / Utilities</summary>
+        <div class="admin-body">
+          <div class="admin-row">
+            <button id="downloadCsvTemplate">Download pricing CSV template</button>
+            <button id="exportPricingCsv">Export pricing CSV</button>
+            <input id="uploadPricingCsv" type="file" accept=".csv" />
+          </div>
+          <div class="admin-row">
+            <label><input type="radio" name="applyMode" value="blanks" checked /> Apply blanks only</label>
+            <label><input type="radio" name="applyMode" value="overwrite" /> Overwrite matches</label>
+            <button id="applyPricingCsv">Apply pricing upload</button>
+          </div>
+          <div id="pricingPreview" class="small"></div>
+          <hr />
+          <div class="admin-row">
+            <button id="saveJson">Save workbook JSON</button>
+            <input id="loadJsonFile" type="file" accept=".json,application/json" />
+            <button id="loadJson">Load workbook JSON</button>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <script>
+    /*********************
+     * CONSTANTS / LOOKUPS
+     *********************/
+    const freqFactors = { "Daily":90, "Weekly":13, "Fortnightly":6.5, "Monthly":3, "6 Weekly":2, "Quarterly":1, "Yearly":0.25, "Once-off":1 };
+    const freqList = Object.keys(freqFactors);
+
+    const contributionStatusConfig = {
+      "": { clinical:0, indep:0, everyday:0, note:"Contribution status not selected", warn:true },
+      "Full pensioner": { clinical:0, indep:5, everyday:17.5, note:"Standard estimated contribution rates.", warn:false },
+      "Part pensioner": { clinical:0, indep:5, everyday:17.5, note:"Estimated minimum/range. Confirm exact rate.", warn:true },
+      "Self-funded with CSHC": { clinical:0, indep:5, everyday:17.5, note:"Estimated minimum/range. Confirm exact rate.", warn:true },
+      "Self-funded without CSHC": { clinical:0, indep:50, everyday:80, note:"High estimated contribution rates.", warn:false },
+      "Means not disclosed": { clinical:0, indep:50, everyday:80, note:"Highest contribution assumed until confirmed.", warn:true },
+      "Grandfathered / transitioned HCP": { clinical:0, indep:0, everyday:0, note:"Check no-worse-off contribution rate.", warn:true },
+      "Exact rates known": { clinical:0, indep:0, everyday:0, note:"Manual contribution rates entered.", warn:false }
+    };
+
+    // Sample structured catalogue - replace with real SAH catalogue when available.
+    const serviceCatalogue = [
+      { serviceId:"SVC100", itemId:"", displayCode:"SVC100", displayName:"Nursing Visit", serviceGroup:"Clinical Care", category:"Clinical", unitType:"Hour", baseFunding:"ONGOING", contributionCategory:"Clinical", fundingType:"STANDARD", allowedInEOL:true, allowedInRCP:true, highTierHM:false },
+      { serviceId:"SVC110", itemId:"A1", displayCode:"SVC110-A1", displayName:"Physiotherapy Session", serviceGroup:"Allied Health", category:"Independence", unitType:"Session", baseFunding:"ONGOING", contributionCategory:"Independence", fundingType:"STANDARD", allowedInEOL:true, allowedInRCP:true, highTierHM:false },
+      { serviceId:"SVC120", itemId:"", displayCode:"SVC120", displayName:"Domestic Assistance", serviceGroup:"Daily Living", category:"Everyday Living", unitType:"Hour", baseFunding:"ONGOING", contributionCategory:"Everyday Living", fundingType:"STANDARD", allowedInEOL:true, allowedInRCP:true, highTierHM:false },
+      { serviceId:"AT200", itemId:"W1", displayCode:"AT200-W1", displayName:"Mobility Aid", serviceGroup:"Assistive Technology", category:"Independence", unitType:"Item", baseFunding:"AT", contributionCategory:"Independence", fundingType:"AT", allowedInEOL:true, allowedInRCP:true, highTierHM:false },
+      { serviceId:"AT210", itemId:"", displayCode:"AT210", displayName:"Monitoring Device", serviceGroup:"Assistive Technology", category:"Clinical", unitType:"Item", baseFunding:"AT", contributionCategory:"Clinical", fundingType:"AT", allowedInEOL:false, allowedInRCP:true, highTierHM:false },
+      { serviceId:"HM300", itemId:"M1", displayCode:"HM300-M1", displayName:"Grab Rail Install", serviceGroup:"Home Modifications", category:"Independence", unitType:"Item", baseFunding:"HM", contributionCategory:"Independence", fundingType:"HM", allowedInEOL:false, allowedInRCP:true, highTierHM:false },
+      { serviceId:"HM390", itemId:"M9", displayCode:"HM390-M9", displayName:"Bathroom Structural Alteration", serviceGroup:"Home Modifications", category:"Independence", unitType:"Item", baseFunding:"HM", contributionCategory:"Independence", fundingType:"HM", allowedInEOL:false, allowedInRCP:true, highTierHM:true }
+    ];
+
+    const state = {
+      setup: { partner:"", provider:"", customer:"", urn:"", classification:"" },
+      contributionHelper: { status:"", clinicalPct:0, independencePct:0, everydayPct:0 },
+      budgets: { sah:0, carry:0, legacy:0, careMgmtPct:0, at:0, hm:0, eol:0, rcp:0 },
+      filters: {
+        ongoing:{ search:"", group:"", category:"" },
+        short:{ search:"", group:"", category:"" }
+      },
+      pricingTable: [], // rows by provider + service_code
+      pricingUploadPreview: { parsed:[], matched:[], unmatched:[] },
+      rowsOngoing: [],
+      rowsShort: []
+    };
+
+    let rowIdCounter = 1;
+
+    /*********************
+     * INIT
+     *********************/
+    init();
+
+    function init() {
+      initContributionStatus();
+      initFilterSelects();
+      wireEvents();
+      applyContributionStatus();
+      refreshAll();
+    }
+
+    function initContributionStatus() {
+      const sel = document.getElementById("contribStatus");
+      const options = ["Select status","Full pensioner","Part pensioner","Self-funded with CSHC","Self-funded without CSHC","Means not disclosed","Grandfathered / transitioned HCP","Exact rates known"];
+      sel.innerHTML = "";
+      options.forEach((o, idx) => {
+        const val = idx === 0 ? "" : o;
+        const opt = document.createElement("option");
+        opt.value = val;
+        opt.textContent = o;
+        sel.appendChild(opt);
+      });
+    }
+
+    function initFilterSelects() {
+      const groups = [...new Set(serviceCatalogue.map(s=>s.serviceGroup))].sort();
+      const cats = [...new Set(serviceCatalogue.map(s=>s.category))].sort();
+
+      [["ongoingGroup","Group"],["shortGroup","Group"]].forEach(([id]) => {
+        const el = document.getElementById(id);
+        el.innerHTML = `<option value="">All service groups</option>` + groups.map(g=>`<option>${g}</option>`).join("");
+      });
+      [["ongoingCategory","Category"],["shortCategory","Category"]].forEach(([id]) => {
+        const el = document.getElementById(id);
+        el.innerHTML = `<option value="">All categories</option>` + cats.map(c=>`<option>${c}</option>`).join("");
+      });
+    }
+
+    function wireEvents() {
+      ["partner","provider","customer","urn","classification"].forEach(id => {
+        document.getElementById(id).addEventListener("input", () => { state.setup[id] = document.getElementById(id).value; refreshAll(); });
+      });
+
+      document.getElementById("contribStatus").addEventListener("change", () => {
+        state.contributionHelper.status = document.getElementById("contribStatus").value;
+        applyContributionStatus();
+        refreshAll();
+      });
+
+      ["clinicalPct","independencePct","everydayPct"].forEach(id => {
+        document.getElementById(id).addEventListener("input", () => {
+          state.contributionHelper[id] = num(document.getElementById(id).value);
+          refreshAll();
+        });
+      });
+
+      [["budgetSah","sah"],["budgetCarry","carry"],["budgetLegacy","legacy"],["careMgmtPct","careMgmtPct"],["budgetAT","at"],["budgetHM","hm"],["budgetEOL","eol"],["budgetRCP","rcp"]]
+        .forEach(([id,key]) => document.getElementById(id).addEventListener("input", () => { state.budgets[key] = num(document.getElementById(id).value); refreshAll(); }));
+
+      document.getElementById("addOngoing").onclick = () => addRow("ongoing");
+      document.getElementById("addShort").onclick = () => addRow("short");
+
+      ["ongoingSearch","ongoingGroup","ongoingCategory"].forEach(id => document.getElementById(id).addEventListener("input", syncFilters));
+      ["shortSearch","shortGroup","shortCategory"].forEach(id => document.getElementById(id).addEventListener("input", syncFilters));
+
+      document.getElementById("clearOngoingFilters").onclick = () => clearFilters("ongoing");
+      document.getElementById("clearShortFilters").onclick = () => clearFilters("short");
+
+      document.getElementById("downloadCsvTemplate").onclick = downloadPricingTemplate;
+      document.getElementById("exportPricingCsv").onclick = exportPricingCsv;
+      document.getElementById("uploadPricingCsv").addEventListener("change", parsePricingUpload);
+      document.getElementById("applyPricingCsv").onclick = applyPricingUpload;
+
+      document.getElementById("saveJson").onclick = saveWorkbookJson;
+      document.getElementById("loadJson").onclick = loadWorkbookJson;
+    }
+
+    function applyContributionStatus() {
+      const status = state.contributionHelper.status || "";
+      const cfg = contributionStatusConfig[status];
+      const manual = status === "Exact rates known";
+
+      if (!manual) {
+        state.contributionHelper.clinicalPct = cfg.clinical;
+        state.contributionHelper.independencePct = cfg.indep;
+        state.contributionHelper.everydayPct = cfg.everyday;
+      }
+
+      document.getElementById("clinicalPct").value = state.contributionHelper.clinicalPct;
+      document.getElementById("independencePct").value = state.contributionHelper.independencePct;
+      document.getElementById("everydayPct").value = state.contributionHelper.everydayPct;
+      document.getElementById("clinicalPct").disabled = !manual;
+      document.getElementById("independencePct").disabled = !manual;
+      document.getElementById("everydayPct").disabled = !manual;
+
+      document.getElementById("contribBanner").textContent = cfg.note + " Contribution rates are estimates unless confirmed by Services Australia or provider records.";
+    }
+
+    function syncFilters() {
+      state.filters.ongoing.search = document.getElementById("ongoingSearch").value.trim().toLowerCase();
+      state.filters.ongoing.group = document.getElementById("ongoingGroup").value;
+      state.filters.ongoing.category = document.getElementById("ongoingCategory").value;
+      state.filters.short.search = document.getElementById("shortSearch").value.trim().toLowerCase();
+      state.filters.short.group = document.getElementById("shortGroup").value;
+      state.filters.short.category = document.getElementById("shortCategory").value;
+      refreshAll();
+    }
+
+    function clearFilters(section) {
+      if (section === "ongoing") ["ongoingSearch","ongoingGroup","ongoingCategory"].forEach(id => document.getElementById(id).value = "");
+      if (section === "short") ["shortSearch","shortGroup","shortCategory"].forEach(id => document.getElementById(id).value = "");
+      syncFilters();
+    }
+
+    /*********************
+     * ROW MANAGEMENT
+     *********************/
+    function addRow(section) {
+      const row = {
+        id: rowIdCounter++, section: section === "ongoing" ? "ongoing" : "short",
+        bucketType: section === "ongoing" ? "ONGOING" : "AT",
+        serviceCode:"", serviceName:"", serviceGroup:"", category:"", unitType:"",
+        baseFunding:"", contributionCategory:"",
+        rate:0, pricingRate:0, pricingSource:"manual",
+        contributionPct:0, contributionSource:"helper",
+        units:1, frequency:"Once-off",
+        includeAdminFee:false, adminFee:0, capApplied:""
+      };
+      (section === "ongoing" ? state.rowsOngoing : state.rowsShort).push(row);
+      refreshAll();
+    }
+
+    function removeRow(section, id) {
+      const arr = section==="ongoing" ? state.rowsOngoing : state.rowsShort;
+      const idx = arr.findIndex(r=>r.id===id);
+      if (idx>=0) arr.splice(idx,1);
+      refreshAll();
+    }
+
+    /*********************
+     * FILTERED SERVICES
+     *********************/
+    function getFilteredServices(section, row=null) {
+      const f = state.filters[section];
+      let list = serviceCatalogue.filter(s => {
+        if (f.search && !(`${s.displayCode} ${s.displayName}`.toLowerCase().includes(f.search))) return false;
+        if (f.group && s.serviceGroup !== f.group) return false;
+        if (f.category && s.category !== f.category) return false;
+        return true;
+      });
+
+      if (section==="ongoing") {
+        list = list.filter(s => s.fundingType==="STANDARD"); // no AT/HM
+      } else if (row) {
+        // bucket-driven constraints
+        const b = row.bucketType;
+        if (b==="AT") list = list.filter(s => s.fundingType==="AT");
+        if (b==="HM") list = list.filter(s => s.fundingType==="HM");
+        if (b==="EOL") list = list.filter(s => s.fundingType!=="HM" && (s.fundingType==="STANDARD" || (s.fundingType==="AT" && s.allowedInEOL)));
+        if (b==="RCP") list = list.filter(s => s.allowedInRCP && (["STANDARD","AT","HM"].includes(s.fundingType)));
+      }
+      return list;
+    }
+
+    /*********************
+     * RENDER
+     *********************/
+    function refreshAll() {
+      renderOngoingTable();
+      renderShortTable();
+      const calc = computeAll();
+      renderSummary(calc);
+      renderWarnings(calc.warnings);
+    }
+
+    function renderOngoingTable() {
+      const body = document.getElementById("ongoingBody");
+      body.innerHTML = "";
+      state.rowsOngoing.forEach(row => {
+        const flags = evaluateRowFlags(row, "ongoing");
+        const totals = calcRowTotals(row);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><button class="btn-neutral">✕</button></td>
+          <td>${escapeHtml(row.serviceGroup || "")}</td>
+          <td>${escapeHtml(row.category || "")}</td>
+          <td>${serviceSelectHtml(row, "ongoing")}</td>
+          <td><input type="number" step="0.01" value="${row.rate}" data-f="rate"></td>
+          <td><input type="number" step="0.01" value="${row.units}" data-f="units"></td>
+          <td>${frequencySelectHtml(row)}</td>
+          <td><input type="number" step="0.1" value="${row.contributionPct}" data-f="contributionPct"></td>
+          <td class="num">${money(totals.govt)}</td>
+          <td class="num">${money(totals.client)}</td>
+          <td class="flag-cell ${flags.length?'danger':''}">${flags.join("; ")}</td>
+          <td>${escapeHtml(row.pricingSource)} / ${escapeHtml(row.contributionSource)}</td>
+          <td class="mono">${escapeHtml(row.serviceCode || "")}</td>
+        `;
+        const btn = tr.querySelector("button");
+        btn.onclick = ()=>removeRow("ongoing", row.id);
+        bindRowInputs(tr, row, "ongoing");
+        body.appendChild(tr);
+      });
+    }
+
+    function renderShortTable() {
+      const body = document.getElementById("shortBody");
+      body.innerHTML = "";
+      state.rowsShort.forEach(row => {
+        const flags = evaluateRowFlags(row, "short");
+        const totals = calcRowTotals(row);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><button class="btn-neutral">✕</button></td>
+          <td>${bucketSelectHtml(row)}</td>
+          <td>${escapeHtml(row.category || "")}</td>
+          <td>${serviceSelectHtml(row, "short")}</td>
+          <td><input type="number" step="0.01" value="${row.rate}" data-f="rate"></td>
+          <td><input type="number" step="0.01" value="${row.units}" data-f="units"></td>
+          <td>${frequencySelectHtml(row)}</td>
+          <td><input type="number" step="0.1" value="${row.contributionPct}" data-f="contributionPct"></td>
+          <td><label><input type="checkbox" data-f="includeAdminFee" ${row.includeAdminFee?'checked':''}> Include</label> ${money(totals.adminFee)} ${row.capApplied?`<span class="pill">${row.capApplied}</span>`:""}</td>
+          <td class="num">${money(totals.totalClaim)}</td>
+          <td class="num">${money(totals.govt)}</td>
+          <td class="num">${money(totals.client)}</td>
+          <td class="flag-cell ${flags.length?'danger':''}">${flags.join("; ")}</td>
+          <td>${escapeHtml(row.pricingSource)} / ${escapeHtml(row.contributionSource)}</td>
+          <td class="mono">${escapeHtml(row.serviceCode || "")}</td>
+        `;
+        tr.querySelector("button").onclick = ()=>removeRow("short", row.id);
+        bindRowInputs(tr, row, "short");
+        body.appendChild(tr);
+      });
+    }
+
+    function bindRowInputs(tr, row, section) {
+      tr.querySelectorAll("input, select").forEach(el => {
+        el.addEventListener("input", () => {
+          const f = el.getAttribute("data-f");
+          if (f === "rate") { row.rate = num(el.value); row.pricingSource = "override"; }
+          else if (f === "units") row.units = num(el.value);
+          else if (f === "frequency") row.frequency = el.value;
+          else if (f === "contributionPct") { row.contributionPct = num(el.value); row.contributionSource = "manual override"; }
+          else if (f === "includeAdminFee") row.includeAdminFee = el.checked;
+          else if (f === "bucketType") { row.bucketType = el.value; row.serviceCode=""; applyServiceToRow(row, null); }
+          else if (f === "serviceCode") {
+            const service = serviceCatalogue.find(s => s.displayCode === el.value);
+            applyServiceToRow(row, service);
+          }
+          refreshAll();
+        });
+      });
+    }
+
+    function serviceSelectHtml(row, section) {
+      const list = getFilteredServices(section, row);
+      const opts = ['<option value="">Select service</option>'].concat(list.map(s => `<option value="${escapeAttr(s.displayCode)}" ${row.serviceCode===s.displayCode?'selected':''}>${escapeHtml(s.displayCode)} - ${escapeHtml(s.displayName)}</option>`));
+      return `<select data-f="serviceCode" class="w-service">${opts.join("")}</select>`;
+    }
+
+    function bucketSelectHtml(row) {
+      const opts = ["AT","HM","EOL","RCP"].map(b => `<option ${row.bucketType===b?'selected':''}>${b}</option>`).join("");
+      return `<select data-f="bucketType">${opts}</select>`;
+    }
+
+    function frequencySelectHtml(row) {
+      const opts = freqList.map(f=>`<option ${row.frequency===f?'selected':''}>${f}</option>`).join("");
+      return `<select data-f="frequency">${opts}</select>`;
+    }
+
+    function applyServiceToRow(row, s) {
+      if (!s) {
+        row.serviceName=""; row.serviceGroup=""; row.category=""; row.unitType=""; row.baseFunding=""; row.contributionCategory="";
+        row.contributionPct = 0;
+        return;
+      }
+      row.serviceCode = s.displayCode;
+      row.serviceName = s.displayName;
+      row.serviceGroup = s.serviceGroup;
+      row.category = s.category;
+      row.unitType = s.unitType;
+      row.baseFunding = s.baseFunding;
+      row.contributionCategory = s.contributionCategory;
+      row.contributionPct = helperContributionForCategory(s.contributionCategory);
+      row.contributionSource = "helper";
+
+      const pr = findPricing(state.setup.provider, s.displayCode);
+      if (pr && pr.actual_rate !== "") {
+        row.rate = num(pr.actual_rate);
+        row.pricingRate = row.rate;
+        row.pricingSource = "pricing table";
+      }
+    }
+
+    function helperContributionForCategory(cat) {
+      if (cat === "Clinical") return state.contributionHelper.clinicalPct;
+      if (cat === "Independence") return state.contributionHelper.independencePct;
+      if (cat === "Everyday Living") return state.contributionHelper.everydayPct;
+      return 0;
+    }
+
+    /*********************
+     * CALCULATIONS
+     *********************/
+    function calcRowTotals(row) {
+      const factor = freqFactors[row.frequency] || 1;
+      const baseTotal = num(row.rate) * num(row.units) * factor;
+
+      let adminFee = 0, capApplied = "";
+      if (row.section === "short" && row.includeAdminFee) {
+        if (row.bucketType === "AT") {
+          adminFee = Math.min(baseTotal * 0.10, 500);
+          capApplied = adminFee < baseTotal * 0.10 ? "AT cap $500 applied" : "";
+        } else if (row.bucketType === "HM") {
+          adminFee = Math.min(baseTotal * 0.15, 1500);
+          capApplied = adminFee < baseTotal * 0.15 ? "HM cap $1,500 applied" : "";
+        }
+      }
+      row.adminFee = adminFee;
+      row.capApplied = capApplied;
+
+      const totalClaim = baseTotal + adminFee;
+      const client = baseTotal * (num(row.contributionPct)/100); // per spec
+      const govt = totalClaim - client;
+      return { baseTotal, adminFee, totalClaim, client, govt };
+    }
+
+    function evaluateRowFlags(row, section) {
+      const flags = [];
+      const svc = serviceCatalogue.find(s=>s.displayCode===row.serviceCode);
+      if (!svc && row.serviceCode) flags.push("Service not found");
+      if (!row.contributionCategory && row.serviceCode) flags.push("Check contribution category");
+      if (section==="ongoing" && svc && ["AT","HM"].includes(svc.fundingType)) flags.push("Wrong bucket: AT/HM excluded");
+      if (section==="short" && svc) {
+        if (row.bucketType==="AT" && svc.fundingType!=="AT") flags.push("AT only");
+        if (row.bucketType==="HM" && svc.fundingType!=="HM") flags.push("HM only");
+        if (row.bucketType==="EOL" && svc.fundingType==="HM") flags.push("No HM in EOL");
+        if (row.bucketType==="EOL" && svc.fundingType==="AT" && !svc.allowedInEOL) flags.push("Wrong bucket");
+        if (row.bucketType==="RCP" && svc.fundingType==="HM" && svc.highTierHM) flags.push("Check high-tier HM");
+      }
+      return flags;
+    }
+
+    function computeAll() {
+      const warnings = [];
+      if (!state.setup.classification) warnings.push("Missing classification");
+      if (!state.contributionHelper.status) warnings.push("Missing contribution status");
+
+      const statusCfg = contributionStatusConfig[state.contributionHelper.status || ""];
+      if (statusCfg && statusCfg.warn) warnings.push("Estimated contribution requires confirmation");
+      if (state.contributionHelper.status === "Grandfathered / transitioned HCP") warnings.push("Check no-worse-off contribution rate");
+
+      const totals = {
+        base:0, atAdmin:0, hmCoord:0, claim:0, govt:0, client:0
+      };
+
+      state.rowsOngoing.forEach(r => {
+        const t = calcRowTotals(r);
+        totals.base += t.baseTotal; totals.claim += t.totalClaim; totals.govt += t.govt; totals.client += t.client;
+      });
+      state.rowsShort.forEach(r => {
+        const t = calcRowTotals(r);
+        totals.base += t.baseTotal; totals.claim += t.totalClaim; totals.govt += t.govt; totals.client += t.client;
+        if (r.bucketType==="AT") totals.atAdmin += t.adminFee;
+        if (r.bucketType==="HM") totals.hmCoord += t.adminFee;
+      });
+
+      const draw = runDrawdown();
+      warnings.push(...draw.warnings);
+
+      return { totals, draw, warnings:[...new Set(warnings)] };
+    }
+
+    function runDrawdown() {
+      let sah = state.budgets.sah + state.budgets.carry;
+      let legacy = state.budgets.legacy;
+      let at = state.budgets.at;
+      let hm = state.budgets.hm;
+      let eol = state.budgets.eol;
+      let rcp = state.budgets.rcp;
+
+      const warnings = [];
+      const spend = { ongoing:0, at:0, hm:0, eol:0, rcp:0 };
+
+      // Ongoing rows
+      for (const r of state.rowsOngoing) {
+        const t = calcRowTotals(r); let amt = t.govt; spend.ongoing += amt;
+        const fromSah = Math.min(sah, amt); sah -= fromSah; amt -= fromSah;
+        if (amt>0) { const fromLegacy = Math.min(legacy, amt); legacy -= fromLegacy; amt -= fromLegacy; }
+        if (amt>0) warnings.push("SAH ongoing overspent");
+      }
+
+      // Short rows by bucket rules
+      for (const r of state.rowsShort) {
+        const svc = serviceCatalogue.find(s=>s.displayCode===r.serviceCode);
+        const t = calcRowTotals(r); let amt = t.govt;
+        if (r.bucketType==="AT") {
+          if (state.budgets.at<=0) warnings.push("No AT budget");
+          spend.at += amt;
+          let x = Math.min(legacy, amt); legacy -= x; amt -= x;
+          x = Math.min(at, amt); at -= x; amt -= x;
+        } else if (r.bucketType==="HM") {
+          if (state.budgets.hm<=0) warnings.push("No HM budget");
+          spend.hm += amt;
+          let x = Math.min(legacy, amt); legacy -= x; amt -= x;
+          x = Math.min(hm, amt); hm -= x; amt -= x;
+        } else if (r.bucketType==="EOL") {
+          if (state.budgets.eol<=0) warnings.push("No EOL budget");
+          spend.eol += amt;
+          let x = Math.min(eol, amt); eol -= x; amt -= x;
+          if (svc && svc.fundingType==="STANDARD") { x = Math.min(sah, amt); sah -= x; amt -= x; }
+          if (svc && svc.fundingType==="AT") { x = Math.min(at, amt); at -= x; amt -= x; }
+          x = Math.min(legacy, amt); legacy -= x; amt -= x;
+        } else if (r.bucketType==="RCP") {
+          if (state.budgets.rcp<=0) warnings.push("No RCP budget");
+          spend.rcp += amt;
+          let x = Math.min(rcp, amt); rcp -= x; amt -= x;
+          if (svc && svc.fundingType==="STANDARD") { x = Math.min(sah, amt); sah -= x; amt -= x; }
+          if (svc && svc.fundingType==="AT") { x = Math.min(at, amt); at -= x; amt -= x; }
+          if (svc && svc.fundingType==="HM") { x = Math.min(hm, amt); hm -= x; amt -= x; }
+          x = Math.min(legacy, amt); legacy -= x; amt -= x;
+        }
+        if (amt>0) warnings.push("Service exceeds funding");
+      }
+
+      return { remaining:{ sah, at, hm, eol, rcp, legacy }, spend, warnings:[...new Set(warnings)] };
+    }
+
+    /*********************
+     * SUMMARY / WARNINGS
+     *********************/
+    function renderSummary(calc) {
+      const t = calc.totals;
+      const rem = calc.draw.remaining;
+
+      document.getElementById("summaryTotals").innerHTML = `
+        <div>Total base service cost</div><div>${money(t.base)}</div>
+        <div>Total AT admin fee</div><div>${money(t.atAdmin)}</div>
+        <div>Total HM coordination fee</div><div>${money(t.hmCoord)}</div>
+        <div>Total claim amount</div><div>${money(t.claim)}</div>
+        <div>Total govt funded spend</div><div>${money(t.govt)}</div>
+        <div>Total client contribution</div><div>${money(t.client)}</div>
+        <div>Net SAH ongoing available</div><div>${money(state.budgets.sah + state.budgets.carry)}</div>
+      `;
+
+      document.getElementById("summaryRemaining").innerHTML = `
+        <div>Remaining SAH ongoing</div><div>${money(rem.sah)}</div>
+        <div>Remaining AT</div><div>${money(rem.at)}</div>
+        <div>Remaining HM</div><div>${money(rem.hm)}</div>
+        <div>Remaining EOL</div><div>${money(rem.eol)}</div>
+        <div>Remaining RCP</div><div>${money(rem.rcp)}</div>
+        <div>Remaining Legacy HCP</div><div>${money(rem.legacy)}</div>
+      `;
+    }
+
+    function renderWarnings(warnings) {
+      const box = document.getElementById("warningsPanel");
+      if (!warnings.length) {
+        box.innerHTML = `<div class="warning-item ok">No active warnings.</div>`;
+        box.style.background = "var(--ok-bg)";
+        box.style.borderColor = "#9de4c0";
+        return;
+      }
+      box.style.background = "var(--warn-bg)";
+      box.style.borderColor = "#f7d8a8";
+      box.innerHTML = warnings.map(w => `<div class="warning-item">• ${escapeHtml(w)}</div>`).join("");
+    }
+
+    /*********************
+     * PRICING CSV
+     *********************/
+    function downloadPricingTemplate() {
+      const hdr = "provider_name,service_code,service_name,unit_type,actual_rate,weekday_rate,saturday_rate,sunday_rate,public_holiday_rate,effective_from,effective_to,active,notes\n";
+      triggerDownload("pricing_template.csv", hdr);
+    }
+
+    function exportPricingCsv() {
+      const hdr = ["provider_name","service_code","service_name","unit_type","actual_rate","weekday_rate","saturday_rate","sunday_rate","public_holiday_rate","effective_from","effective_to","active","notes"];
+      const rows = state.pricingTable.map(r => hdr.map(h => csvCell(r[h] ?? "")).join(","));
+      triggerDownload("pricing_export.csv", hdr.join(",") + "\n" + rows.join("\n"));
+    }
+
+    function parsePricingUpload(evt) {
+      const f = evt.target.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const text = String(reader.result || "");
+        const parsed = parseSimpleCsv(text);
+        const matched = [], unmatched = [];
+        parsed.forEach(r => {
+          const keyOk = r.provider_name && r.service_code;
+          const cat = serviceCatalogue.find(s => s.displayCode === r.service_code);
+          if (keyOk && cat) matched.push(r); else unmatched.push(r);
+        });
+        state.pricingUploadPreview = { parsed, matched, unmatched };
+        document.getElementById("pricingPreview").innerHTML =
+          `Preview: matched ${matched.length}, unmatched ${unmatched.length}. Protected fields (service_code/service_name/unit_type) will not be overwritten.`;
+      };
+      reader.readAsText(f);
+    }
+
+    function applyPricingUpload() {
+      const mode = document.querySelector('input[name="applyMode"]:checked').value;
+      const rows = state.pricingUploadPreview.matched || [];
+      rows.forEach(inRow => {
+        const idx = state.pricingTable.findIndex(p => p.provider_name===inRow.provider_name && p.service_code===inRow.service_code);
+        if (idx<0) {
+          state.pricingTable.push(sanitizePricingRow(inRow));
+        } else {
+          // Only update allowed mutable fields
+          const mutable = ["actual_rate","weekday_rate","saturday_rate","sunday_rate","public_holiday_rate","effective_from","effective_to","active","notes"];
+          mutable.forEach(k => {
+            const incoming = (inRow[k] ?? "").trim();
+            if (mode==="overwrite") state.pricingTable[idx][k] = incoming;
+            if (mode==="blanks" && (state.pricingTable[idx][k] === "" || state.pricingTable[idx][k] == null)) state.pricingTable[idx][k] = incoming;
+          });
+        }
+      });
+      refreshAll();
+      document.getElementById("pricingPreview").innerHTML += " Applied.";
+    }
+
+    function findPricing(provider, serviceCode) {
+      return state.pricingTable.find(p => p.provider_name===provider && p.service_code===serviceCode) || null;
+    }
+
+    function sanitizePricingRow(r) {
+      const byCode = serviceCatalogue.find(s=>s.displayCode===r.service_code);
+      return {
+        provider_name: r.provider_name || "",
+        service_code: r.service_code || "",
+        service_name: byCode ? byCode.displayName : (r.service_name || ""),
+        unit_type: byCode ? byCode.unitType : (r.unit_type || ""),
+        actual_rate: r.actual_rate || "",
+        weekday_rate: r.weekday_rate || "",
+        saturday_rate: r.saturday_rate || "",
+        sunday_rate: r.sunday_rate || "",
+        public_holiday_rate: r.public_holiday_rate || "",
+        effective_from: r.effective_from || "",
+        effective_to: r.effective_to || "",
+        active: r.active || "",
+        notes: r.notes || ""
+      };
+    }
+
+    /*********************
+     * JSON SAVE/LOAD
+     *********************/
+    function saveWorkbookJson() {
+      const payload = {
+        setup: state.setup,
+        contributionHelper: state.contributionHelper,
+        budgets: state.budgets,
+        serviceRows: { ongoing: state.rowsOngoing, short: state.rowsShort },
+        pricingTables: state.pricingTable,
+        filters: state.filters
+      };
+      triggerDownload("sah_partner_planner.json", JSON.stringify(payload, null, 2));
+    }
+
+    function loadWorkbookJson() {
+      const f = document.getElementById("loadJsonFile").files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(String(reader.result||"{}"));
+          state.setup = data.setup || state.setup;
+          state.contributionHelper = data.contributionHelper || state.contributionHelper;
+          state.budgets = data.budgets || state.budgets;
+          state.rowsOngoing = (data.serviceRows && data.serviceRows.ongoing) || [];
+          state.rowsShort = (data.serviceRows && data.serviceRows.short) || [];
+          state.pricingTable = data.pricingTables || [];
+          state.filters = data.filters || state.filters;
+
+          // paint controls
+          document.getElementById("partner").value = state.setup.partner || "";
+          document.getElementById("provider").value = state.setup.provider || "";
+          document.getElementById("customer").value = state.setup.customer || "";
+          document.getElementById("urn").value = state.setup.urn || "";
+          document.getElementById("classification").value = state.setup.classification || "";
+          document.getElementById("contribStatus").value = state.contributionHelper.status || "";
+
+          document.getElementById("budgetSah").value = state.budgets.sah || 0;
+          document.getElementById("budgetCarry").value = state.budgets.carry || 0;
+          document.getElementById("budgetLegacy").value = state.budgets.legacy || 0;
+          document.getElementById("careMgmtPct").value = state.budgets.careMgmtPct || 0;
+          document.getElementById("budgetAT").value = state.budgets.at || 0;
+          document.getElementById("budgetHM").value = state.budgets.hm || 0;
+          document.getElementById("budgetEOL").value = state.budgets.eol || 0;
+          document.getElementById("budgetRCP").value = state.budgets.rcp || 0;
+
+          document.getElementById("ongoingSearch").value = state.filters.ongoing.search || "";
+          document.getElementById("ongoingGroup").value = state.filters.ongoing.group || "";
+          document.getElementById("ongoingCategory").value = state.filters.ongoing.category || "";
+          document.getElementById("shortSearch").value = state.filters.short.search || "";
+          document.getElementById("shortGroup").value = state.filters.short.group || "";
+          document.getElementById("shortCategory").value = state.filters.short.category || "";
+
+          applyContributionStatus();
+          refreshAll();
+        } catch(e) {
+          alert("Invalid JSON file.");
+        }
+      };
+      reader.readAsText(f);
+    }
+
+    /*********************
+     * UTILITIES
+     *********************/
+    function parseSimpleCsv(text) {
+      const lines = text.replace(/\r/g,"").split("\n").filter(Boolean);
+      if (!lines.length) return [];
+      const hdr = lines[0].split(",").map(s=>s.trim());
+      return lines.slice(1).map(line => {
+        const cols = line.split(",");
+        const obj = {};
+        hdr.forEach((h,i)=>obj[h]= (cols[i] || "").trim());
+        return obj;
+      });
+    }
+
+    function triggerDownload(filename, text) {
+      const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function money(n) { return `$${num(n).toFixed(2)}`; }
+    function num(v) { const x = Number(v); return Number.isFinite(x) ? x : 0; }
+    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])); }
+    function escapeAttr(s) { return escapeHtml(s); }
+    function csvCell(v) {
+      const s = String(v ?? "");
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+    }
+  </script>
+</body>
+</html>
